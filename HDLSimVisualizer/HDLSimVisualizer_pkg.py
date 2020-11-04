@@ -133,9 +133,8 @@ class HDLSim:
         self.cyc_list = range(self.cycles)
 
         # expected output data
-        #TODO: Latency
         data_out_exp = design_func(self.data_in)
-        self.data_out_exp = np.roll(data_out_exp, latency)
+        self.data_out_exp = np.roll(data_out_exp, latency*self.output_ss)
 
     def compareSimWithDesign(self,
                              sim_output_file: str = "output_results.txt",
