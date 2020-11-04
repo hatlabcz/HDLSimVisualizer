@@ -9,16 +9,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import HDLSimVisualizer_pkg as hsv
 from HDLSimVisualizer_pkg import HDLSim
-
+from os.path import expanduser
+HOME = expanduser("~")
 # ----------- generics ---------------------
-generics = {"input_width": 16,
+generics = {"input_width": 31,
             "input_ss": 5,  # supersample
-            "output_width": 15
+            "output_width": 16
             }
 generics["output_ss"] = generics["input_ss"]
 # --------- data----------------------------
 input_data = np.arange(0, 100, 1)
-offset_lower_bit = np.arange(0, 2, 1).repeat(50)
+offset_lower_bit = np.arange(1, 3, 1).repeat(50)
 
 # --------- Design function -----------------
 def slice_otf(input_data):
@@ -35,16 +36,20 @@ def slice_otf(input_data):
         dout.append(hsv.slv_to_int(dout_bin))
     return np.array(dout)
 
+expected_out = slice_otf(input_data)
 
 # ------------main---------------------
-sim_in_dir = r"C:\Users\zctid.LAPTOP-150KME16\OneDrive\Lab\FPGA\VivadoPorjects\Demodulator\Demodulator\Demodulator.srcs\sim_1\imports\sim\\"
-sim_out_dir = r"C:\Users\zctid.LAPTOP-150KME16\OneDrive\Lab\FPGA\VivadoPorjects\Demodulator\Demodulator\Demodulator.sim\sim_1\behav\xsim\\"
+sim_in_dir = HOME + r"\OneDrive\Lab\FPGA\VivadoPorjects\Demodulator\Demodulator\Demodulator.srcs\sim_1\imports\sim\\"
+sim_out_dir = HOME + r"\OneDrive\Lab\FPGA\VivadoPorjects\Demodulator\Demodulator\Demodulator.sim\sim_1\behav\xsim\\"
 latency = 1
 
-hsv.export_binary(sim_in_dir + "input_vectors.txt",
+hsv.export_binary(sim_in_dir + "input_vectors_1.txt",
                   input_data, generics["input_width"], generics["input_ss"])
+hsv.export_binary(sim_in_dir + "input_vectors_2.txt",
+                  offset_lower_bit, 32, generics["input_ss"])
 
-sim = HDLSim(generics, input_data, sim_out_dir, slice_otf, latency)
+
+sim_pass = hsv.compareSimWithDesign(generics, latency, expected_out,
+                                    sim_out_dir+"output_results.txt")
 #
-sim.compareSimWithDesign()
 

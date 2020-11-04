@@ -93,15 +93,15 @@ def import_binary(file_name: str, data_width: int,
         for line in lines:
             r_line = line.strip()
             for i in range(supersample):
-                r_data = r_line[-data_width: ]
-                r_line = r_line[:-data_width ]
+                r_data = r_line[-data_width:]
+                r_line = r_line[:-data_width]
                 data.append(slv_to_int(r_data))
     return np.array(data)
 
 
 class HDLSim:
     def __init__(self, generics: Dict, data_in: np.array(int), sim_dir: str,
-                design_func: Callable, latency: int):
+                 design_func: Callable, latency: int):
         """
 
         Parameters
@@ -134,7 +134,7 @@ class HDLSim:
 
         # expected output data
         data_out_exp = design_func(self.data_in)
-        self.data_out_exp = np.roll(data_out_exp, latency*self.output_ss)
+        self.data_out_exp = np.roll(data_out_exp, latency * self.output_ss)
 
     def compareSimWithDesign(self,
                              sim_output_file: str = "output_results.txt",
@@ -155,7 +155,7 @@ class HDLSim:
         self.data_out = import_binary(self.sim_dir + sim_output_file,
                                       self.output_width,
                                       self.output_ss)
-        print (self.data_out)
+        print(self.data_out)
         if (self.data_out == self.data_out_exp).all:
             pass_exam = True
         else:
@@ -171,3 +171,46 @@ class HDLSim:
         return pass_exam
 
 
+
+def compareSimWithDesign(generics: Dict, latency: int,
+                         expected_output: np.array(int), sim_output_file: str,
+                         plot: bool = True):
+    """
+    compare HDL simulation data with the expected design output data.
+    Parameters
+    ----------
+    generics : Dict
+        dictionary that contains the generics of the HDL block
+    expected_output : np.array(int)
+        expected output result of the design function
+    sim_output_file : str
+        file name of the output data from HDL simulation
+    plot : bool
+        when True, plot the comparision between simulation and design
+    Returns
+    -------
+    pass_exam : bool
+    """
+    output_width = generics["output_width"]
+    output_ss = generics.get("output_ss", 1)
+    data_out = import_binary(sim_output_file, output_width, output_ss)
+    print(data_out)
+
+    data_out_exp = np.roll(expected_output, latency * output_ss)
+    print(data_out_exp)
+
+    if (data_out == data_out_exp).all:
+        pass_exam = True
+    else:
+        pass_exam = False
+
+    cyc_list = range(len(data_out) // output_ss)
+    if plot:
+        for i in range(output_ss):
+            plt.figure(i)
+            plt.plot(cyc_list, data_out_exp[i::output_ss],
+                     '-', label='expected output')
+            plt.plot(cyc_list, data_out[i::output_ss],
+                     "*", label='simulation output')
+            plt.legend()
+    return pass_exam
