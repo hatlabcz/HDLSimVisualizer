@@ -12,6 +12,7 @@ output and compare it with expected block outputs.
 import numpy as np
 from typing import Dict, Callable
 import matplotlib.pyplot as plt
+import os.path
 
 
 def int_to_slv(val: int, width: int) -> str:
@@ -56,6 +57,14 @@ def export_binary(file_name: str, data: np.array(int), data_width: int,
     """
     # fill in zeros if number of data points is not multiples of data_ss
     data = np.concatenate((data, np.zeros(len(data) % supersample, dtype=int)))
+    if not os.path.exists(file_name):
+        file_name = file_name.split('\\')[-1]
+        print(file_name.split('\\'), file_name)
+        file_name = r".\InputVectors\\" + file_name
+        print(
+            "File is exported to .\InputVectors, please manually import it in "
+            "Vivado. After that the new file will be automatically exported "
+            "to the simulation folder")
     with open(file_name, "w") as text_file:
         n_lines = len(data) // supersample
         for i in range(n_lines):
@@ -169,7 +178,6 @@ class HDLSim:
                          "*", label='simulation output')
                 plt.legend()
         return pass_exam
-
 
 
 def compareSimWithDesign(generics: Dict, latency: int,
