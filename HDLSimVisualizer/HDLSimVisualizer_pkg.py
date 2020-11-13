@@ -207,7 +207,7 @@ def compareSimWithDesign(generics: Dict, latency: int,
     data_out_exp = np.roll(expected_output, latency * output_ss)
     print(data_out_exp)
 
-    if (data_out == data_out_exp).all:
+    if (data_out == data_out_exp).all():
         pass_exam = True
     else:
         pass_exam = False
