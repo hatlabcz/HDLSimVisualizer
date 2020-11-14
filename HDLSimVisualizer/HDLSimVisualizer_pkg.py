@@ -215,7 +215,7 @@ def compareSimWithDesign(generics: Dict, latency: int,
     cyc_list = range(len(data_out) // output_ss)
     if plot:
         for i in range(output_ss):
-            plt.figure(i)
+            plt.figure()
             plt.plot(cyc_list, data_out_exp[i::output_ss],
                      '-', label='expected output')
             plt.plot(cyc_list, data_out[i::output_ss],
